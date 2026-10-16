@@ -27,6 +27,15 @@ class shieldDataManager {
     this.missingShield = this.maxShield - this.currentShield;
     return this.missingShield;
   }
+
+  public setCurrentShield(newShieldValue: number) {
+    const boundedShieldValue = Math.max(
+      0,
+      Math.min(shieldData.maxShield, newShieldValue),
+    );
+    if (boundedShieldValue === shieldData.currentShield) return;
+    shieldData.currentShield = boundedShieldValue;
+  }
 }
 
 const shieldData = new shieldDataManager();
@@ -55,25 +64,30 @@ function renderStats() {
     `Shield charge: ${shieldData.currentShield} · Missing charge: ${shieldData.getMissingShield()}`;
 }
 
-function setCurrentShield(newShieldValue: number) {
-  const boundedShieldValue = Math.max(
-    0,
-    Math.min(shieldData.maxShield, newShieldValue),
-  );
-  if (boundedShieldValue === shieldData.currentShield) return;
-  shieldData.currentShield = boundedShieldValue;
+function updateVisuals() {
   drawMeter();
   if (panel) updateStats();
 }
 
+document.addEventListener("click", (event) => {
+  const uiEventTarget = event.target as HTMLButtonElement | null;
+  if (uiEventTarget != null) {
+    if (
+      uiEventTarget.id == "counter-less" ||
+      uiEventTarget.id == "counter-more" ||
+      uiEventTarget.id == "counter-reset"
+    ) updateVisuals();
+  }
+});
+
 document.querySelector<HTMLButtonElement>("#counter-less")!.onclick = () => {
-  setCurrentShield(shieldData.currentShield - 1);
+  shieldData.setCurrentShield(shieldData.currentShield - 1);
 };
 document.querySelector<HTMLButtonElement>("#counter-more")!.onclick = () => {
-  setCurrentShield(shieldData.currentShield + 1);
+  shieldData.setCurrentShield(shieldData.currentShield + 1);
 };
 document.querySelector<HTMLButtonElement>("#counter-reset")!.onclick = () => {
-  setCurrentShield(0);
+  shieldData.setCurrentShield(0);
 };
 document.querySelector<HTMLButtonElement>("#counter-open")!.onclick = () => {
   if (panel) return;
