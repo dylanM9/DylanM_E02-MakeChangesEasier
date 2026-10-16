@@ -69,17 +69,37 @@ function updateVisuals() {
   if (panel) updateStats();
 }
 
+function updatePanel(button: HTMLButtonElement) {
+  if (!panel && button.id == "counter-open") {
+    panel = document.createElement("p");
+    host.append(panel);
+    renderStats();
+  } else if (panel && button.id == "counter-close") {
+    panel.remove();
+    panel = null;
+  }
+}
+
+//UI listener
 document.addEventListener("click", (event) => {
   const uiEventTarget = event.target as HTMLButtonElement | null;
+  // if it IS a button
   if (uiEventTarget != null) {
+    // counter update
     if (
       uiEventTarget.id == "counter-less" ||
       uiEventTarget.id == "counter-more" ||
       uiEventTarget.id == "counter-reset"
     ) updateVisuals();
+    // panel update
+    if (
+      uiEventTarget.id == "counter-open" ||
+      uiEventTarget.id == "counter-close"
+    ) updatePanel(uiEventTarget);
   }
 });
 
+// numerical updates
 document.querySelector<HTMLButtonElement>("#counter-less")!.onclick = () => {
   shieldData.setCurrentShield(shieldData.currentShield - 1);
 };
@@ -89,15 +109,5 @@ document.querySelector<HTMLButtonElement>("#counter-more")!.onclick = () => {
 document.querySelector<HTMLButtonElement>("#counter-reset")!.onclick = () => {
   shieldData.setCurrentShield(0);
 };
-document.querySelector<HTMLButtonElement>("#counter-open")!.onclick = () => {
-  if (panel) return;
-  panel = document.createElement("p");
-  host.append(panel);
-  renderStats();
-};
-document.querySelector<HTMLButtonElement>("#counter-close")!.onclick = () => {
-  if (!panel) return;
-  panel.remove();
-  panel = null;
-};
+
 drawMeter();
