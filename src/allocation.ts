@@ -5,12 +5,18 @@ const ctx = canvas.getContext("2d")!;
 const readout = document.querySelector<HTMLParagraphElement>(
   "#allocation-readout",
 )!;
-let producers = 2;
 
-function update() {
-  const production = producers * 3;
-  const consumption = 6;
-  const balance = production - consumption;
+const consumption: number = 6;
+let producers: number = 2;
+let production: number;
+let balance: number;
+
+function updateData(): void {
+  production = producers * 3;
+  balance = production - consumption;
+}
+
+function updateUI() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let i = 0; i < 6; i++) {
     ctx.fillStyle = i < producers ? "#27766b" : "#c9d2c9";
@@ -37,15 +43,19 @@ function update() {
 
 document.querySelector<HTMLButtonElement>("#allocation-less")!.onclick = () => {
   producers = Math.max(0, producers - 1);
-  update();
+  updateData();
+  updateUI();
 };
 document.querySelector<HTMLButtonElement>("#allocation-more")!.onclick = () => {
   producers = Math.min(6, producers + 1);
-  update();
+  updateData();
+  updateUI();
 };
 document.querySelector<HTMLButtonElement>("#allocation-reset")!.onclick =
   () => {
     producers = 2;
-    update();
+    updateData();
+    updateUI();
   };
-update();
+updateData();
+updateUI();
