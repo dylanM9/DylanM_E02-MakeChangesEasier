@@ -6,14 +6,27 @@ const readout = document.querySelector<HTMLParagraphElement>(
   "#allocation-readout",
 )!;
 
-const consumption: number = 6;
+const consumption = { num: 6 };
 let producers: number = 2;
-let production: number;
+const production = { num: 2 };
 let balance: number;
 
+const dataUiInfo = [
+  {
+    textContents: "Production",
+    rectFillColor: "#27766b",
+    value: production,
+  },
+  {
+    textContents: "Consumption",
+    rectFillColor: "#a44d23",
+    value: consumption,
+  },
+];
+
 function updateData(): void {
-  production = producers * 3;
-  balance = production - consumption;
+  production.num = producers * 3;
+  balance = production.num - consumption.num;
 }
 
 function updateUI() {
@@ -28,15 +41,25 @@ function updateUI() {
   ctx.fillStyle = "#233e43";
   ctx.font = "14px system-ui";
   ctx.fillText(`Producers: ${producers} / 6`, 18, 76);
-  ctx.fillText(`Production: ${production}`, 18, 102);
-  ctx.fillStyle = "#27766b";
-  ctx.fillRect(18, 110, production * 14, 20);
-  ctx.fillStyle = "#233e43";
-  ctx.fillText(`Consumption: ${consumption}`, 18, 154);
-  ctx.fillStyle = "#a44d23";
-  ctx.fillRect(18, 162, consumption * 14, 20);
+
+  for (let i = 0; i < dataUiInfo.length; i++) {
+    ctx.fillStyle = "#233e43";
+    ctx.fillText(
+      "" + dataUiInfo[i].textContents + ": " + dataUiInfo[i].value.num,
+      18,
+      102 + i * 52,
+    );
+    ctx.fillStyle = dataUiInfo[i].rectFillColor;
+    ctx.fillRect(
+      18,
+      110 + i * 52,
+      dataUiInfo[i].value.num * 14,
+      20,
+    );
+  }
+
   readout.textContent =
-    `Assigned: ${producers}/6 · Production: ${production} · Consumption: ${consumption} · Balance: ${
+    `Assigned: ${producers}/6 · Production: ${production.num} · Consumption: ${consumption.num} · Balance: ${
       balance > 0 ? "+" : ""
     }${balance}`;
 }
