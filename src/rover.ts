@@ -3,9 +3,13 @@ export {};
 const canvas = document.querySelector<HTMLCanvasElement>("#rover-canvas")!;
 const ctx = canvas.getContext("2d")!;
 const readout = document.querySelector<HTMLParagraphElement>("#rover-readout")!;
+const roverCommands = document.querySelector<HTMLParagraphElement>(
+  "#rover-queue-status",
+)!;
 const x = { num: 2 };
 const y = { num: 2 };
 let direction = 0;
+let commandsDirection = 0;
 const directionRecords = [
   { direction: "North", offset: -1, axis: y },
   { direction: "East", offset: 1, axis: x },
@@ -62,19 +66,60 @@ class rightCommand implements Command {
   }
 }
 
+class CommandQueue<T extends () => void> {
+  private queue: T[] = [];
+  public enqueue(command: T): void {
+    this.queue.push(command);
+  }
+  public dequeue(): T | undefined {
+    return this.queue.shift();
+  }
+  public runAll(): void {
+    while (this.queue.length > 0) {
+      const cmd = this.dequeue();
+      cmd?.();
+    }
+  }
+  public clear(): void {
+    while (this.queue.length > 0) {
+      this.dequeue();
+    }
+  }
+  public get size(): number {
+    return this.queue.length;
+  }
+}
+
 const rfc = new forwardCommand();
 const rrc = new rightCommand();
+const cmdQueue = new CommandQueue<() => void>();
 
 document.querySelector<HTMLButtonElement>("#rover-forward")!.onclick = () => {
-  rfc.execute();
+  cmdQueue.enqueue(() => rfc.execute());
+  roverCommands.textContent += "Move " +
+    directionRecords[commandsDirection].direction + " | ";
 };
 document.querySelector<HTMLButtonElement>("#rover-right")!.onclick = () => {
-  rrc.execute();
+  cmdQueue.enqueue(() => rrc.execute());
+  commandsDirection += 1;
+  roverCommands.textContent += "Turn to face " +
+    directionRecords[commandsDirection].direction + " | ";
 };
 document.querySelector<HTMLButtonElement>("#rover-reset")!.onclick = () => {
   x.num = 2;
   y.num = 2;
   direction = 0;
+  commandsDirection = 0;
+  cmdQueue.clear();
+  roverCommands.textContent = "";
   drawRover();
+};
+document.querySelector<HTMLButtonElement>("#rover-run")!.onclick = () => {
+  cmdQueue.runAll();
+  roverCommands.textContent = "";
+};
+document.querySelector<HTMLButtonElement>("#rover-clear")!.onclick = () => {
+  cmdQueue.clear();
+  roverCommands.textContent = "";
 };
 drawRover();
